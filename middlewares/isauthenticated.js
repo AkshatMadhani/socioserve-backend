@@ -1,32 +1,34 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+
 const isAuthenticated = async (req, res, next) => {
   try {
-    console.log('🔍 Checking authentication...');
-    console.log('🍪 Cookies:', req.cookies);
-    
     const token = req.cookies.token;
-
+    
     if (!token) {
-      console.log('❌ No token found');
       return res.status(401).json({ 
         success: false, 
-        message: "Unauthorized - Please login first" 
+        message: "Unauthorized: No token provided" 
       });
     }
 
-    console.log('✅ Token found, verifying...');
-
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: decoded.id };
-    
-    console.log('✅ User authenticated, ID:', decoded.id);
-    
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "User does not exist" 
+      });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    console.error("❌ Auth Error:", error.message);
-    return res.status(401).json({ 
+    console.error("Auth error:", error);
+    return res.status(403).json({ 
       success: false, 
-      message: "Unauthorized - Invalid token" 
+      message: "Invalid or expired token" 
     });
   }
 };

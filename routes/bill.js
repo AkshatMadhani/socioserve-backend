@@ -8,13 +8,16 @@ import {
   getAllBills, 
   uploadPaymentProof, 
   verifyPayment, 
-  deleteBill 
+  deleteBill,
+  demoPayment
 } from "../controller/bill.js";
 
 const billRouter = express.Router();
 
 billRouter.get("/user", isAuthenticated, getUserBills);
 billRouter.post("/upload-proof/:billId", isAuthenticated, upload.single('paymentProof'), uploadPaymentProof);
+billRouter.post("/demo-payment/:billId", isAuthenticated, demoPayment);
+
 billRouter.post("/create", isadmin, createBill);
 billRouter.get("/all", isadmin, getAllBills);
 billRouter.put("/verify/:billId", isadmin, verifyPayment);

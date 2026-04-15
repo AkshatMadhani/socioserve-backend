@@ -6,7 +6,7 @@ const registerComplaint = async (req, res) => {
     const { subject, description } = req.body;
     const userId = req.user.id;
 
-    console.log('📝 Registering complaint for user:', userId);
+    console.log('Registering complaint for user:', userId);
 
     if (!subject || !description) {
       return res.status(400).json({ 
@@ -27,7 +27,7 @@ const registerComplaint = async (req, res) => {
     const savedComplaint = await Complaint.create(newComplaint);
     await savedComplaint.populate('userId', 'username email flatno');
 
-    console.log('✅ Complaint registered successfully:', savedComplaint._id);
+    console.log('Complaint registered successfully:', savedComplaint._id);
 
     res.status(201).json({
       success: true,
@@ -47,13 +47,13 @@ const registerComplaint = async (req, res) => {
 const getComplaints = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log('📋 Fetching complaints for user:', userId);
+    console.log(' Fetching complaints for user:', userId);
 
     const complaints = await Complaint.find({ userId: userId })
       .populate("userId", "username email flatno")
       .sort({ createdAt: -1 });
 
-    console.log('✅ Found', complaints.length, 'complaints');
+    console.log(' Found', complaints.length, 'complaints');
 
     res.status(200).json({ 
       success: true,

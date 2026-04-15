@@ -1,5 +1,4 @@
 import User from "../models/user.js";
-
 const getuser = async (req, res) => {
   try {
     const users = await User.find({});

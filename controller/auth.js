@@ -5,7 +5,6 @@ import jwt from "jsonwebtoken";
 const register = async (req, res) => {
   try {
     const { username, email, password, flatno, role } = req.body;
-
     if (!username || !email || !password || !flatno) {
       return res.status(400).json({ success: false, message: "All fields are required" });
     }
@@ -27,7 +26,7 @@ const register = async (req, res) => {
 
     await newUser.save();
 
-    console.log('✅ User registered:', email);
+    console.log(' User registered:', email);
     return res.status(201).json({ success: true, message: "Registration successful" });
   } catch (error) {
     console.error("Registration Error:", error);
@@ -38,18 +37,18 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    console.log('🔐 Login attempt for:', email);
+    console.log(' Login attempt for:', email);
 
     const user = await User.findOne({ email });
 
     if (!user) {
-      console.log('❌ User not found:', email);
+      console.log(' User not found:', email);
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      console.log('❌ Invalid password for:', email);
+      console.log(' Invalid password for:', email);
       return res.status(401).json({ success: false, message: "Invalid credentials" });
     }
 
@@ -57,17 +56,17 @@ const login = async (req, res) => {
       expiresIn: '24h'
     });
 
-    console.log('✅ Token created for user:', user._id);
-    console.log('🍪 Setting cookie with token...');
+    console.log('Token created for user:', user._id);
+    console.log('Setting cookie with token...');
     
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: true, 
-      sameSite: "none",
-      maxAge: 24 * 60 * 60 * 1000
-    });
+res.cookie("token", token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production', 
+  sameSite: process.env.NODE_ENV === 'production' ? "none" : "lax",
+  maxAge: 24 * 60 * 60 * 1000
+});
 
-    console.log('✅ Login successful for:', email, 'Role:', user.role);
+    console.log('Login successful for:', email, 'Role:', user.role);
 
     return res.status(200).json({
       success: true,
@@ -93,15 +92,13 @@ const logout = async (req, res) => {
   try {
     console.log('👋 Logout request received');
     res.clearCookie("token");
-    console.log('✅ Cookie cleared');
+    console.log(' Cookie cleared');
     return res.status(200).json({ success: true, message: "Logout successful" });
   } catch (error) {
     console.error("Logout Error:", error);
     return res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
-
-// ✅ Make sure this function exists!
 const getCurrentUser = async (req, res) => {
   try {
     console.log('👤 Get current user request, User ID:', req.user?.id);
@@ -109,14 +106,14 @@ const getCurrentUser = async (req, res) => {
     const user = await User.findById(req.user.id).select('-password');
     
     if (!user) {
-      console.log('❌ User not found for ID:', req.user.id);
+      console.log(' User not found for ID:', req.user.id);
       return res.status(404).json({ 
         success: false, 
         message: "User not found" 
       });
     }
 
-    console.log('✅ User found:', user.email);
+    console.log('User found:', user.email);
 
     return res.status(200).json({
       success: true,
